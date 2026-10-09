@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Creator {
+  id                 String             @id @default(cuid())
+  name               String
+  email              String             @unique
+  passwordHash       String
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  content      Content[]
+  verification Verification?
+  sessions     Session[]
+
+  @@map("creators")
+}
+
+model Session {
+  id        String   @id
+  creatorId String
+  creator   Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([creatorId])
+  @@map("sessions")
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model Verification {
+  id               String           @id @default(cuid())
+  creatorId        String           @unique
+  creator          Creator          @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  completedStep    Int              @default(0)
+  legalName        String?
+  dateOfBirth      String?
+  country          String?
+  idType           IdType?
+  idFileName       String?
+  idBackFileName   String?
+  idQualityWarning Boolean          @default(false)
+  selfieCaptured   Boolean          @default(false)
+  rejectionReason  RejectionReason?
+  submittedAt      DateTime?
+  reviewedAt       DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@map("verifications")
+}
+
+enum RejectionReason {
+  DOCUMENT_UNREADABLE
+}
+
+enum IdType {
+  PASSPORT
+  DRIVERS_LICENSE
+  NATIONAL_ID
+}
+
+model Content {
+  id             String        @id @default(cuid())
+  creatorId      String
+  creator        Creator       @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  title          String
+  description    String
+  priceCents     Int
+  thumbnailUrl   String?
+  videoFileName  String
+  videoSizeBytes BigInt
+  status         ContentStatus @default(DRAFT)
+  scheduledAt    DateTime?
+  publishedAt    DateTime?
+  views          Int           @default(0)
+  deletedAt      DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  purchases Purchase[]
+
+  @@index([creatorId, deletedAt])
+  @@index([status, scheduledAt])
+  @@map("content")
+}
+
+enum ContentStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+}
+
+model Purchase {
+  id           String         @id @default(cuid())
+  contentId    String
+  content      Content        @relation(fields: [contentId], references: [id], onDelete: Restrict)
+  buyerCountry String
+  amountCents  Int
+  status       PurchaseStatus @default(COMPLETED)
+  createdAt    DateTime       @default(now())
+
+  @@index([contentId, createdAt])
+  @@map("purchases")
+}
+
+enum PurchaseStatus {
+  COMPLETED
+  PENDING
+  REFUNDED
+  FAILED
+}

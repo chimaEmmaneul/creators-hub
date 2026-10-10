@@ -26,7 +26,6 @@
 
 ## Where did AI save the most time?
 
-<!-- TODO(you): check this matches your experience and edit freely. -->
 - **Accessible UI building blocks.** The dialog's focus handling, the form
   field wiring (labels, hints and errors linked for screen readers), and
   the React Aria dropdowns, combobox and date pickers. Getting these right
@@ -41,8 +40,6 @@
 
 ## One example where AI output was rejected, corrected or significantly changed
 
-<!-- TODO(you): keep the one or two you can explain best, in your own words. -->
-
 - **Prisma 7 configuration.** The first AI-generated setup paired Prisma 7
   with a Prisma 5/6-style schema (`url = env(...)` in the datasource). The
   setup steps in the README could never have worked. It was caught by
@@ -53,23 +50,6 @@
   Next.js 16 renamed the recovery callback to `retry` (`reset` now only
   re-renders without re-fetching). This was caught by reading the docs
   bundled in `node_modules/next/dist/docs` instead of trusting memory.
-- **Searchable country field showed hidden keywords.** The first combobox
-  put country codes into each option's `textValue` so "NG" would find
-  Nigeria. React Aria writes `textValue` into the input on selection, so
-  the field would have shown "Nigeria NG". Fixed with a custom filter that
-  searches label + keywords while displaying only the label.
-- **Toasts lost after navigation.** Delete toasts were first placed in
-  `mutate()` callbacks. TanStack Query doesn't run those once the calling
-  component unmounts, and deleting from the detail page navigates away
-  immediately, so the success message would never appear. They moved to
-  the mutation-level callbacks.
-- **Quality check too strict.** The first brightness ceiling (215) flagged
-  ordinary light-coloured ID cards as "washed out". This was caught in an
-  end-to-end run with a synthetic card image, and raised to 235, with glare
-  detection still catching blown-out patches.
-- **Video sizes overflowed the database.** Seeding failed because 2–5 GB
-  file sizes don't fit a 32-bit `Int`. The column became `BigInt`, converted
-  to a number at the DTO boundary.
 
 ## How did I verify AI-generated code?
 

@@ -49,6 +49,98 @@ const JORDAN_CONTENT: ContentSeed[] = [
   { title: "Creating a Consistent Visual Style", priceCents: 1499, status: "DRAFT", ageDays: 1 },
 ];
 
+/**
+ * Real, playable videos for the seeded library: Blender open movies hosted on
+ * Wikimedia Commons under Creative Commons licences (credited on each video's
+ * page). One per seeded item, in seed order.
+ */
+const DEMO_VIDEOS = [
+  {
+    url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/1/10/Tears_of_Steel_in_4k_-_Official_Blender_Foundation_release.webm/Tears_of_Steel_in_4k_-_Official_Blender_Foundation_release.webm.720p.vp9.webm",
+    poster: "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/10/Tears_of_Steel_in_4k_-_Official_Blender_Foundation_release.webm/960px--Tears_of_Steel_in_4k_-_Official_Blender_Foundation_release.webm.jpg",
+    credit: "“Tears of Steel” by Blender Foundation, CC BY 3.0",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Tears_of_Steel_in_4k_-_Official_Blender_Foundation_release.webm",
+  },
+  {
+    url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c0/Big_Buck_Bunny_4K.webm/Big_Buck_Bunny_4K.webm.720p.vp9.webm",
+    poster: "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c0/Big_Buck_Bunny_4K.webm/960px--Big_Buck_Bunny_4K.webm.jpg",
+    credit: "“Big Buck Bunny” by Blender Foundation, CC BY 3.0",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Big_Buck_Bunny_4K.webm",
+  },
+  {
+    url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/f/f1/Sintel_movie_4K.webm/Sintel_movie_4K.webm.720p.vp9.webm",
+    poster: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/Sintel_movie_4K.webm/960px--Sintel_movie_4K.webm.jpg",
+    credit: "“Sintel” by Blender Foundation, CC BY 3.0",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Sintel_movie_4K.webm",
+  },
+  {
+    url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/a/a5/Spring_-_Blender_Open_Movie.webm/Spring_-_Blender_Open_Movie.webm.720p.vp9.webm",
+    poster: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a5/Spring_-_Blender_Open_Movie.webm/960px--Spring_-_Blender_Open_Movie.webm.jpg",
+    credit: "“Spring” by Blender Studio, CC BY 4.0",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Spring_-_Blender_Open_Movie.webm",
+  },
+  {
+    url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/a/a2/Elephants_Dream_%282006%29.webm/Elephants_Dream_%282006%29.webm.720p.vp9.webm",
+    poster: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/Elephants_Dream_%282006%29.webm/960px--Elephants_Dream_%282006%29.webm.jpg",
+    credit: "“Elephants Dream” by Blender Foundation, CC BY 2.5",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Elephants_Dream_(2006).webm",
+  },
+  {
+    url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/7/76/Sprite_Fright_-_Blender_Open_Movie-full_movie.webm/Sprite_Fright_-_Blender_Open_Movie-full_movie.webm.720p.vp9.webm",
+    poster: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/Sprite_Fright_-_Blender_Open_Movie-full_movie.webm/960px--Sprite_Fright_-_Blender_Open_Movie-full_movie.webm.jpg",
+    credit: "“Sprite Fright” by Blender Studio, CC BY 4.0",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Sprite_Fright_-_Blender_Open_Movie-full_movie.webm",
+  },
+  {
+    url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/3f/Coffee_Run_-_Blender_Open_Movie-full_movie.webm/Coffee_Run_-_Blender_Open_Movie-full_movie.webm.720p.vp9.webm",
+    poster: "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3f/Coffee_Run_-_Blender_Open_Movie-full_movie.webm/960px--Coffee_Run_-_Blender_Open_Movie-full_movie.webm.jpg",
+    credit: "“Coffee Run” by Blender Studio, CC BY 4.0",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Coffee_Run_-_Blender_Open_Movie-full_movie.webm",
+  },
+  {
+    url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/7/7c/Caminandes_-_Gran_Dillama_-_Blender_Foundation%27s_new_Open_Movie.webm/Caminandes_-_Gran_Dillama_-_Blender_Foundation%27s_new_Open_Movie.webm.720p.vp9.webm",
+    poster: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Caminandes_-_Gran_Dillama_-_Blender_Foundation%27s_new_Open_Movie.webm/960px--Caminandes_-_Gran_Dillama_-_Blender_Foundation%27s_new_Open_Movie.webm.jpg",
+    credit: "“Caminandes: Gran Dillama” by Blender Foundation, CC BY-SA 3.0",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Caminandes_-_Gran_Dillama_-_Blender_Foundation%27s_new_Open_Movie.webm",
+  },
+  {
+    url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/7/7a/Charge_-_Blender_Open_Movie-full_movie.webm/Charge_-_Blender_Open_Movie-full_movie.webm.720p.vp9.webm",
+    poster: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Charge_-_Blender_Open_Movie-full_movie.webm/960px--Charge_-_Blender_Open_Movie-full_movie.webm.jpg",
+    credit: "“Charge” by Blender Studio, CC BY 4.0",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Charge_-_Blender_Open_Movie-full_movie.webm",
+  },
+  {
+    url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/38/WING_IT%21_-_Blender_Open_Movie-full_movie.webm/WING_IT%21_-_Blender_Open_Movie-full_movie.webm.720p.vp9.webm",
+    poster: "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/38/WING_IT%21_-_Blender_Open_Movie-full_movie.webm/960px--WING_IT%21_-_Blender_Open_Movie-full_movie.webm.jpg",
+    credit: "“Wing It!” by Blender Studio, CC BY 4.0",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:WING_IT!_-_Blender_Open_Movie-full_movie.webm",
+  },
+  {
+    url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/a/a9/HERO_-_Blender_Open_Movie-full_movie.webm/HERO_-_Blender_Open_Movie-full_movie.webm.720p.vp9.webm",
+    poster: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a9/HERO_-_Blender_Open_Movie-full_movie.webm/960px--HERO_-_Blender_Open_Movie-full_movie.webm.jpg",
+    credit: "“Hero” by Blender Studio, CC BY 4.0",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:HERO_-_Blender_Open_Movie-full_movie.webm",
+  },
+  {
+    url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/0/02/Glass_Half_-_Blender_Open_Movie-full_movie.webm/Glass_Half_-_Blender_Open_Movie-full_movie.webm.720p.vp9.webm",
+    poster: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/Glass_Half_-_Blender_Open_Movie-full_movie.webm/960px--Glass_Half_-_Blender_Open_Movie-full_movie.webm.jpg",
+    credit: "“Glass Half” by Blender Studio, CC BY 4.0",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Glass_Half_-_Blender_Open_Movie-full_movie.webm",
+  },
+  {
+    url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/b/b2/The_Daily_Dweebs_-_Blender_Open_Movie-full_movie.webm/The_Daily_Dweebs_-_Blender_Open_Movie-full_movie.webm.720p.vp9.webm",
+    poster: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/The_Daily_Dweebs_-_Blender_Open_Movie-full_movie.webm/960px--The_Daily_Dweebs_-_Blender_Open_Movie-full_movie.webm.jpg",
+    credit: "“The Daily Dweebs” by Blender Studio, CC BY 4.0",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:The_Daily_Dweebs_-_Blender_Open_Movie-full_movie.webm",
+  },
+  {
+    url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/f/f2/SINGULARITY_-_Blender_Open_Movie-full_movie.webm/SINGULARITY_-_Blender_Open_Movie-full_movie.webm.480p.vp9.webm",
+    poster: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/SINGULARITY_-_Blender_Open_Movie-full_movie.webm/960px--SINGULARITY_-_Blender_Open_Movie-full_movie.webm.jpg",
+    credit: "“Singularity” by Blender Studio, CC BY 4.0",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:SINGULARITY_-_Blender_Open_Movie-full_movie.webm",
+  },
+] as const;
+
 const COUNTRIES = ["US", "NG", "GB", "CA", "DE", "IN", "BR", "AU", "FR", "ZA", "KE", "JP"];
 const PURCHASE_STATUS_WEIGHTS = [
   ...Array<"COMPLETED">(14).fill("COMPLETED"),
@@ -62,14 +154,18 @@ const PURCHASE_COUNT = 40;
 
 function toContentRow(creatorId: string, seed: ContentSeed, index: number, random: () => number) {
   const createdAt = daysFromNow(-seed.ageDays);
+  const video = DEMO_VIDEOS[index % DEMO_VIDEOS.length];
   return {
     creatorId,
     title: seed.title,
     description: `A practical guide to ${seed.title.toLowerCase()}, with examples you can apply to your next video.`,
     priceCents: seed.priceCents,
-    thumbnailUrl: `https://picsum.photos/seed/creatorhub-${index}/640/360`,
+    thumbnailUrl: video.poster,
     videoFileName: `${seed.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.mp4`,
     videoSizeBytes: BigInt(Math.round((0.2 + random() * 3) * 1024 ** 3)),
+    videoUrl: video.url,
+    videoCredit: video.credit,
+    videoCreditUrl: video.creditUrl,
     status: seed.status,
     views: seed.views ?? 0,
     scheduledAt: seed.scheduledInDays === undefined ? null : daysFromNow(seed.scheduledInDays),

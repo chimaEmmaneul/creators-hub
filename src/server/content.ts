@@ -111,6 +111,10 @@ export async function updateContent(
       ...(input.video && {
         videoFileName: input.video.fileName,
         videoSizeBytes: BigInt(input.video.sizeBytes),
+        // A replaced file is a simulated upload, so the old playable source no longer applies.
+        videoUrl: null,
+        videoCredit: null,
+        videoCreditUrl: null,
       }),
       ...publicationFields(input, current),
     },

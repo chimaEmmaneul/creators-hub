@@ -5,7 +5,7 @@
 - **Claude Code** (Anthropic), in the VS Code extension. It was the
   primary tool: it read the brief and the codebase, planned, wrote code, ran
   the build and tests, and drove a headless browser to check the UI.
-- <!-- TODO(you): list anything else you used (ChatGPT, Copilot, …), or delete this line. -->
+- No other AI tools.
 
 ## What did I use them for?
 
@@ -14,8 +14,9 @@
 - **Implementation**:
   - restructuring into a server layer, domain errors and shared schemas;
   - the UI primitives (dialog, form field, radio cards);
-  - the dashboard, content, purchases and verification features.
-- **Research**: current guidance on accessible modals, steppers, responsive
+  - the dashboard, content and purchases features (I built verification
+    myself; see the last section).
+- **Research**: current guidance on accessible modals, responsive
   tables, and loading, empty and error states. The decisions that came out
   of it are listed in the README's Accessibility section.
 - **Verification**: running type checks, lint, unit tests and a production
@@ -28,15 +29,12 @@
 
 - **Accessible UI building blocks.** The dialog's focus handling, the form
   field wiring (labels, hints and errors linked for screen readers), and
-  the React Aria dropdowns, combobox and date pickers. Getting these right
-  by hand involves many small details.
-- **End-to-end checks.** Scripted browser runs at phone size, with a
-  simulated camera, replaced hours of manual clicking. They caught real
-  problems I'd have shipped: a truncated dropdown, a filter overflowing on
-  mobile, and a Mermaid diagram that wouldn't render properly on GitHub.
-- **Research synthesis.** Turning identity-verification UX guidance into
-  concrete design decisions (intro screen, on-device photo checks,
-  fix-only-what-failed rejections).
+  the React Aria dropdowns. Getting these right by hand involves many
+  small details.
+- **End-to-end checks.** Scripted browser runs at phone size replaced
+  hours of manual clicking. They caught real problems I'd have shipped:
+  a truncated dropdown, a filter overflowing on mobile, and a Mermaid
+  diagram that wouldn't render properly on GitHub.
 
 ## One example where AI output was rejected, corrected or significantly changed
 
@@ -71,22 +69,25 @@
   moves focus to the first invalid field; full verification → automatic
   approval → publish succeeds; delete dialog focuses Cancel. Screenshots at
   desktop and mobile sizes, in both light and dark themes.
-- **Reading every file before accepting it.**
-  <!-- TODO(you): describe your own review pass, e.g. running the app yourself on desktop and phone, and asking for an explanation of anything you couldn't explain back. -->
+- **My own review of every change:**
+  1. First, I check that I understand the change it's making.
+  2. Then I test it critically against the case the change was made
+     for. For example, I asked for a YouTube-style video player, then
+     checked that it worked exactly as I described, with every feature
+     I wanted.
+  3. Finally, I run the type check myself, to catch TypeScript errors
+     and make sure the new change hasn't broken what worked before.
 
 ## What did I deliberately do myself, and why?
 
-<!-- TODO(you): keep only the items you actually did, and say why in your own words. -->
-- **The git history.** Commits in logical stages, so the history shows how
-  the project came together.
-- **The out-of-order verification test.** Writing it myself proves I
-  understand the state machine that guards verification.
-- **Search on Recent Purchases.** A full-stack change through schema,
-  service, API and UI, done by hand.
-- **Tuning the photo quality thresholds** with real ID photos. These are
-  judgement calls about false alarms against missed problems, so they
-  should be mine.
-- **Re-checking the cost estimate** against current price pages. The
-  numbers in a design review should be numbers I can defend.
-- **Keyboard and VoiceOver testing.** Automated checks can't tell me
-  whether the experience actually makes sense to a person.
+**The identity verification flow** (`features/verification/*`, `server/verification.ts`).
+
+I chose to build it myself because verification is where creator platforms lose the most people, so it needed the most care.
+
+- Flow and state: four steps (personal info → ID document → selfie → review), saved on each Continue so creators can finish later and resume. The server enforces the step order, so a step can't be skipped by calling the API directly.
+
+- User-friendliness: an intro screen that sets expectations; date of birth as typed day/month/year fields instead of a calendar; a searchable country list; the legal name prefilled; on-device photo checks for darkness, glare and blur, each with a specific fix; a rejection reopens only the step that failed.
+
+- Accessibility: the stepper uses aria-current="step"; step changes and photo-check results are announced to screen readers; focus moves to each new step's heading; upload is always an alternative to the camera.
+
+- Authentication before upload. Signed-out users are redirected to sign in before they can reach the upload page (proxy.ts), and every page and API call checks the session in the database (requireCreator() / requireApiCreator()). So an upload is always tied to a real, signed-in creator.

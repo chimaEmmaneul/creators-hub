@@ -83,7 +83,11 @@ model Content {
   thumbnailUrl   String?
   videoFileName  String
   videoSizeBytes BigInt
-  status         ContentStatus @default(DRAFT)
+  /// Playable file for seeded demo content. Uploads are simulated, so new content has none.
+  videoUrl       String?
+  videoCredit    String?
+  videoCreditUrl String?
+  status        ContentStatus @default(DRAFT)
   scheduledAt    DateTime?
   publishedAt    DateTime?
   views          Int           @default(0)

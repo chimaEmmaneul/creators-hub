@@ -27,6 +27,10 @@ export interface ContentItem {
   thumbnailUrl: string | null;
   videoFileName: string;
   videoSizeBytes: number;
+  /** Playable source; null for uploads, which are simulated in this demo. */
+  videoUrl: string | null;
+  videoCredit: string | null;
+  videoCreditUrl: string | null;
   status: ContentStatus;
   scheduledAt: string | null;
   publishedAt: string | null;

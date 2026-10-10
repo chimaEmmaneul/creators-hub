@@ -77,6 +77,8 @@
   --color-on-accent: var(--on-accent);
   --color-accent-soft: var(--accent-soft);
   --color-accent-soft-fg: var(--accent-soft-fg);
+  /* The primary, lightened for the always-dark video player (same in both themes). */
+  --color-player-accent: oklch(0.68 0.17 277);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-warning: var(--warning);
@@ -98,6 +100,7 @@
   --animate-shimmer: shimmer 1.6s ease-in-out infinite;
   --animate-fade-in: fade-in 160ms ease-out;
   --animate-scale-in: scale-in 180ms cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  --animate-player-flash: player-flash 650ms ease-out forwards;
 
   @keyframes shimmer {
     0%, 100% { opacity: 1; }
@@ -110,6 +113,10 @@
   @keyframes scale-in {
     from { opacity: 0; transform: translateY(6px) scale(0.98); }
     to { opacity: 1; transform: none; }
+  }
+  @keyframes player-flash {
+    from { opacity: 1; transform: scale(0.9); }
+    to { opacity: 0; transform: scale(1.25); }
   }
 }
 

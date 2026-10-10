@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/Card";
 import { QueryView } from "@/components/ui/QueryView";
 import { LoadingRegion, Skeleton } from "@/components/ui/Skeleton";
 import { Thumbnail } from "@/components/ui/Thumbnail";
+import { VideoPlayer } from "@/components/ui/VideoPlayer";
 import { contentQueries } from "../queries";
 import { useContentActions } from "../hooks/use-content-actions";
 import { ContentActionDialogs } from "./ContentActionDialogs";
@@ -82,14 +83,7 @@ function Detail({ item }: { item: ContentItem }) {
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="relative">
-          <Thumbnail src={item.thumbnailUrl} sizes="(max-width: 1024px) 100vw, 720px" priority className="rounded-xl shadow-card" />
-          <span className="absolute inset-0 grid place-items-center" aria-hidden="true">
-            <span className="grid size-16 place-items-center rounded-full bg-black/55 text-white backdrop-blur">
-              <Play className="ml-1 size-7" />
-            </span>
-          </span>
-        </div>
+        <VideoPreview item={item} />
 
         <div className="flex flex-col gap-4">
           <Card className="p-4">
@@ -124,5 +118,41 @@ function Detail({ item }: { item: ContentItem }) {
 
       <ContentActionDialogs actions={actions} />
     </article>
+  );
+}
+
+function VideoPreview({ item }: { item: ContentItem }) {
+  if (!item.videoUrl) {
+    return (
+      <figure className="flex flex-col gap-2">
+        <div className="relative">
+          <Thumbnail src={item.thumbnailUrl} sizes="(max-width: 1024px) 100vw, 720px" priority className="rounded-xl shadow-card" />
+          <span className="absolute inset-0 grid place-items-center" aria-hidden="true">
+            <span className="grid size-16 place-items-center rounded-full bg-black/55 text-white backdrop-blur">
+              <Play className="ml-1 size-7" />
+            </span>
+          </span>
+        </div>
+        <figcaption className="text-xs text-muted">Preview unavailable: uploads are simulated in this demo.</figcaption>
+      </figure>
+    );
+  }
+
+  return (
+    <figure className="flex flex-col gap-2">
+      <VideoPlayer key={item.videoUrl} src={item.videoUrl} poster={item.thumbnailUrl ?? undefined} title={item.title} />
+      {item.videoCredit && (
+        <figcaption className="text-xs text-muted">
+          Demo video:{" "}
+          {item.videoCreditUrl ? (
+            <a href={item.videoCreditUrl} target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-fg">
+              {item.videoCredit}
+            </a>
+          ) : (
+            item.videoCredit
+          )}
+        </figcaption>
+      )}
+    </figure>
   );
 }

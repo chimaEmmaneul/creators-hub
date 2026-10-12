@@ -328,22 +328,122 @@ per month; viewers in many countries.
 
 ### Rough monthly cost estimate
 
-The numbers are approximate list prices; the reasoning matters more than
-the totals.
+List prices were checked in October 2026 (sources at the end of this
+section). As the brief says, the assumptions and reasoning matter more than
+the exact totals, so every line shows its working.
 
-| Item | Assumption | Estimate / month |
+#### Assumptions
+
+| Input | Value | Why |
 |---|---|---|
-| **CDN bandwidth** | 10M views × 8 min average watch time × ~2 Mbps blended bitrate ≈ **120 MB/view ≈ 1.2 PB/month** | **~$40k** at blended list price (~$0.035/GB); **$10–25k** with committed pricing or a lower-cost CDN |
-| CDN requests and edge authentication | ~80 segment requests per view ≈ 800M requests; an edge function on each | ~$1k |
-| Rendition storage | 1M videos × ~250 MB (360p + 720p) ≈ 250 TB, plus hot-tier 1080p | ~$4–6k (R2/S3 standard) |
-| Original storage | 1M × ~750 MB ≈ 750 TB, mostly in infrequent-access or archive tiers | ~$1–3k |
-| Transcoding | ~50k new videos per month × 10 min = 500k minutes, 2 base renditions on spot ffmpeg (~4× realtime) plus promotions | ~$1–2k (a managed transcoder like MediaConvert would be ~$10k+) |
-| App/API compute | A few autoscaled containers | ~$1–2k |
-| Postgres | Primary + read replica, managed | ~$1–2k |
-| Queue, functions, logging, monitoring | | ~$1–2k |
-| **Total** | | **~$50–60k at list price; ~$25–35k optimised** |
+| Views per month | 10,000,000 | From the brief |
+| Average watch time per view | 8 minutes (480 s) | Viewers rarely finish long videos; creator tutorials typically run 8–15 min |
+| Blended delivered bitrate | ~2 Mbps | Adaptive streaming mixes 360p (~0.8 Mbps), 720p (~2.5 Mbps) and some 1080p |
+| Stored videos | 1,000,000, averaging 10 minutes | From the brief; length assumed |
+| New uploads | ~50,000 per month (500,000 minutes) | 100,000 creators uploading about one video every two months |
+| Original file size | ~750 MB (10 min at ~10 Mbps) | Typical phone or camera export |
+| Renditions per video | 360p + 720p ≈ 250 MB (3.3 Mbps × 600 s); 1080p for ~5% of videos | The demand-tiered ladder in section F |
+| Segment length | 6 s, so ~80 segment requests per view, plus manifests | Common HLS/CMAF setting |
+| Units | 1 PB = 1,000 TB = 1,000,000 GB (decimal, as providers bill) | |
 
-**Largest cost as the platform scales: CDN bandwidth.** It grows linearly
-with views and watch time, while storage and transcoding grow with uploads.
-That's why the main cost levers are bandwidth levers: better codecs for hot
-content, the right default bitrate, cache hit ratio and CDN pricing.
+#### Line by line
+
+**1. CDN bandwidth: the dominant cost.**
+10M views × 480 s × 2 Mbps = 960 Mb = **120 MB per view**, so
+10M × 120 MB = **1.2 PB (1,200,000 GB) a month**.
+
+At CloudFront's published North America/Europe tiers:
+
+| Tier | Volume | Rate | Cost |
+|---|---|---|---|
+| First 10 TB | 10,000 GB | $0.085 | $850 |
+| Next 40 TB | 40,000 GB | $0.080 | $3,200 |
+| Next 100 TB | 100,000 GB | $0.060 | $6,000 |
+| Next 350 TB | 350,000 GB | $0.040 | $14,000 |
+| Next 524 TB | 524,000 GB | $0.030 | $15,720 |
+| Remaining 176 TB | 176,000 GB | $0.025 | $4,400 |
+| **Total** | **1,200,000 GB** | **~$0.037 average** | **~$44,200** |
+
+Viewers in Asia, South America and Africa are billed at higher regional
+rates, so a global audience pushes this up. At this volume, though, no one
+pays list price: committed-use contracts and video-focused CDNs are
+typically **$0.008–0.02/GB**, which is **$10–25k**. Delivering from
+Cloudflare R2 removes the storage-to-CDN egress line entirely.
+
+**2. CDN requests and edge authorisation.**
+10M views × ~85 requests (segments + manifests) ≈ 850M requests.
+HTTPS requests at $0.01 per 10,000 = **$850**. A token-checking edge function
+(CloudFront Functions, $0.10 per million) adds **$85**. About **$1k** in
+total.
+
+**3. Rendition storage.**
+1M videos × 250 MB = 250 TB, plus 1080p for ~50,000 popular videos
+(5 Mbps × 600 s ≈ 375 MB each, so ~19 TB): **~270 TB**.
+On R2 at $0.015/GB that's **$4.0k**; on S3 Standard at ~$0.022/GB it's **$5.9k**.
+
+**4. Original storage, tiered by age.**
+750 TB in total, moved by lifecycle rules:
+
+| Age | Volume | Class | Rate | Cost |
+|---|---|---|---|---|
+| Under 30 days | ~37.5 TB (one month of uploads) | S3 Standard | $0.023/GB | $860 |
+| 30–180 days | ~187.5 TB (five months) | Glacier Instant Retrieval | $0.004/GB | $750 |
+| Over 180 days | ~525 TB | Glacier Deep Archive | $0.00099/GB | $520 |
+| **Total** | **750 TB** | | | **~$2.1k** |
+
+Re-transcoding an old video from Deep Archive takes up to 12 hours, which
+is acceptable because it only happens when a codec or ladder changes.
+Without tiering, the same 750 TB on S3 Standard would cost about **$17k**
+a month.
+
+**5. Transcoding.**
+500,000 new minutes × 2 base renditions = 1M output minutes, plus 1080p and
+AV1 promotions for the small share of videos that earn them.
+- **Self-managed ffmpeg on spot instances:** roughly $0.001–0.003 per
+  output minute, so **~$1–3k**.
+- **For comparison, AWS MediaConvert** (Basic tier): 720p is billed as HD
+  at 2 × $0.0075 = $0.015/min and 360p as SD at $0.0075/min, so
+  500,000 × $0.0225 = **~$11k**. It's simpler to run, at about 5× the cost.
+
+**6. Application platform.**
+Autoscaled API containers (~$1–2k), managed Postgres with a read replica
+(~$1–2k), and queues, functions, logging and monitoring (~$1–2k):
+**~$3–6k**. This is small because video bytes never pass through the API.
+
+#### Total
+
+| Item | List price | Optimised |
+|---|---|---|
+| CDN bandwidth | $44k (CloudFront list) | $10–25k (committed / video CDN) |
+| CDN requests + edge auth | $1k | $1k |
+| Rendition storage | $6k (S3) | $4k (R2) |
+| Original storage | $2k (tiered) | $2k (tiered) |
+| Transcoding | $1–3k (spot ffmpeg) | $1–3k (spot ffmpeg) |
+| Application platform | $3–6k | $3–6k |
+| **Total per month** | **~$57–62k** | **~$21–41k** |
+| **Cost per view** | **~$0.006** | **~$0.002–0.004** |
+
+**Largest cost as the platform scales: CDN bandwidth**, at 70–75% of the
+list-price total and 50–60% of the optimised total. It grows with every
+view and minute watched, while storage and transcoding grow only with
+uploads. So the main cost levers are bandwidth levers:
+
+- **CDN pricing:** moving from list price to a committed rate saves
+  $19–34k a month, more than every other line combined.
+- **Watch time and bitrate:** each extra minute of average watch time adds
+  ~12% to bandwidth (~$5.5k at list price), and lowering the blended
+  bitrate by 10% saves about the same.
+- **Better codecs for popular videos:** if half of all views come from
+  videos with an AV1 rendition at ~35% lower bitrate, bandwidth drops by
+  ~17%.
+- **Cache hit ratio:** an origin shield keeps storage reads and egress low
+  as traffic grows.
+
+**Sources (list prices, October 2026):**
+[Amazon CloudFront pricing](https://aws.amazon.com/cloudfront/pricing/),
+with the tier ladder summarised by [egresscost.com](https://egresscost.com/aws/cloudfront-pricing);
+[Cloudflare R2 pricing](https://developers.cloudflare.com/r2/pricing/);
+[Amazon S3 pricing](https://aws.amazon.com/s3/pricing/), with storage-class rates summarised by [Upstash](https://upstash.com/blog/aws-s3-pricing-explained-2026);
+[AWS Elemental MediaConvert pricing](https://aws.amazon.com/mediaconvert/pricing/).
+Rates vary by region and change over time; check the providers' pages
+before budgeting.

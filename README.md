@@ -351,22 +351,34 @@ viewers in many countries. Full answer:
    per-title encoding, and a second origin region only if the metrics show
    slow starts far away.
 
-**Rough monthly cost estimate** (list prices; the reasoning matters more
-than the total):
+**Rough monthly cost estimate.** List prices were checked in October 2026.
+The full working and sources are in
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md#rough-monthly-cost-estimate).
+Assumptions: 8 minutes average watch time, ~2 Mbps blended bitrate,
+10-minute videos, ~50,000 uploads a month.
 
-| Item | Assumption | Estimate / month |
-|---|---|---|
-| **CDN bandwidth** | 10M views × 8 min × ~2 Mbps ≈ 120 MB per view ≈ **1.2 PB** | **~$40k** at list price; $10–25k with committed pricing |
-| CDN requests and edge auth | ~800M segment requests | ~$1k |
-| Storage | ~250 TB of renditions + ~750 TB of originals, mostly in cold tiers | ~$5–9k |
-| Transcoding | ~50k new videos a month on spot workers | ~$1–2k |
-| Compute, database, queue and monitoring | Autoscaled containers, managed Postgres | ~$3–6k |
-| **Total** | | **~$50–60k at list price; ~$25–35k optimised** |
+| Item | Working | List price | Optimised |
+|---|---|---|---|
+| **CDN bandwidth** | 10M views × 480 s × 2 Mbps = 120 MB per view = **1.2 PB** | **$44k** (CloudFront tiers, ~$0.037/GB) | **$10–25k** (committed / video-CDN rates, $0.008–0.02/GB) |
+| CDN requests + edge auth | ~850M HTTPS requests; a token check on each | $1k | $1k |
+| Rendition storage | 1M × 250 MB (360p + 720p) + 1080p for popular videos ≈ 270 TB | $6k (S3) | $4k (R2) |
+| Original storage | 750 TB tiered by age: Standard → Glacier Instant Retrieval → Deep Archive (vs ~$17k untiered) | $2k | $2k |
+| Transcoding | 500k new minutes × 2 renditions on spot ffmpeg (MediaConvert would be ~$11k) | $1–3k | $1–3k |
+| Application platform | API containers, Postgres + replica, queues, monitoring | $3–6k | $3–6k |
+| **Total per month** | | **~$57–62k** | **~$21–41k** |
+| **Cost per view** | | **~$0.006** | **~$0.002–0.004** |
 
-**Largest cost as the platform scales: CDN bandwidth.** It grows with
-every view and minute watched, so the main levers are bandwidth levers:
-better codecs for hot videos, the right default bitrate, cache hit ratio
-and CDN pricing.
+**Largest cost as the platform scales: CDN bandwidth**, at 70–75% of the
+list-price total. It grows with every view and minute watched, while
+storage and transcoding grow only with uploads. The biggest levers are
+therefore bandwidth levers:
+- **CDN pricing:** a committed rate saves $19–34k a month, more than every
+  other line combined.
+- **Watch time and bitrate:** each extra minute of average watch time adds
+  ~12% to bandwidth.
+- **AV1 for popular videos:** cuts total bandwidth by ~17% if half of all
+  views come from them.
+- **Cache hit ratio.**
 
 ---
 
